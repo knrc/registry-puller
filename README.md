@@ -7,6 +7,7 @@ This repository contains code for a webhook which monitors the creation of Servi
 The following steps will install the webhook into an existing OpenShift deployment, instructions for kubernetes will be similar
 
 * download your secret and create a file called secret.yaml
+* go get github.com/knrc/registry-puller
 * make
 * oc new-project registry-puller
 * oc create configmap -n registry-puller registry-secret --from-file=secret.yaml
