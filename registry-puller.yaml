@@ -1,0 +1,155 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: registry-puller
+  namespace: registry-puller
+  labels:
+    app: registry-puller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: registry-puller
+  labels:
+    app: registry-puller
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations"]
+  verbs: ["get", "list", "watch", "patch", "create"]
+- apiGroups: ["extensions","apps"]
+  resources: ["deployments"]
+  resourceNames: ["registry-puller"]
+  verbs: ["get"]
+- apiGroups: ["extensions"]
+  resources: ["deployments/finalizers"]
+  resourceNames: ["registry-puller"]
+  verbs: ["update"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: registry-puller
+  labels:
+    app: registry-puller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: registry-puller
+subjects:
+  - kind: ServiceAccount
+    name: registry-puller
+    namespace: registry-puller
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry-puller
+  namespace: registry-puller
+  labels:
+    app: registry-puller
+data:
+  mutatingwebhookconfiguration.yaml: |-    
+    apiVersion: admissionregistration.k8s.io/v1beta1
+    kind: MutatingWebhookConfiguration
+    metadata:
+      name: registry-puller
+      labels:
+        app: registry-puller
+    webhooks:
+      - name: registry-puller.kevinconner.io
+        clientConfig:
+          service:
+            name: registry-puller
+            namespace: registry-puller
+            path: "/webhook"
+          caBundle: ""
+        rules:
+          - operations: [ "CREATE" ]
+            apiGroups: [""]
+            apiVersions: ["v1"]
+            resources: ["serviceaccounts"]
+        failurePolicy: Fail
+        #namespaceSelector:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-puller
+  namespace: registry-puller
+  labels:
+    app: registry-puller
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: webhook-certificate
+spec:
+  ports:
+  - port: 443
+    targetPort: webhook
+    name: webhook
+  selector:
+    app: registry-puller
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: registry-puller
+  namespace: registry-puller
+  labels:
+    app: registry-puller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: registry-puller
+    spec:
+      serviceAccountName: registry-puller
+      containers:
+        - name: registry-puller
+          image: "knrc/registry-puller:1.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - name: webhook
+            containerPort: 8443
+          command:
+          - /usr/local/bin/registry-puller
+          - webhook
+          - --webhook-config-file
+          - /etc/config/mutatingwebhookconfiguration.yaml
+          - --registry-secret-file
+          - /etc/registry-secret/secret.yaml
+          - --port=8443
+          - --tlsCertFile
+          - /etc/certs/tls.crt
+          - --tlsKeyFile
+          - /etc/certs/tls.key
+          - --caCertFile
+          - /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+          volumeMounts:
+          - name: certs
+            mountPath: /etc/certs
+            readOnly: true
+          - name: config
+            mountPath: /etc/config
+            readOnly: true
+          - name: registry-secret
+            mountPath: /etc/registry-secret
+            readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+      volumes:
+      - name: certs
+        secret:
+          secretName: webhook-certificate
+      - name: registry-secret
+        configMap:
+          name: registry-secret
+      - name: config
+        configMap:
+          name: registry-puller
