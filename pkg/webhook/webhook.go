@@ -342,9 +342,9 @@ func (wh *Webhook) inject(ar *admissionv1beta1.AdmissionReview) (reviewResponse 
 	logInfo.Printf("AdmissionReview for Kind=%v Namespace=%v Name=%v UID=%v Rfc6902PatchOperation=%v UserInfo=%v",
 		req.Kind, req.Namespace, req.Name, req.UID, req.Operation, req.UserInfo)
 
-	secret, err := wh.getOrCreateSecret(sa.Namespace)
+	secret, err := wh.getOrCreateSecret(req.Namespace)
 	if err != nil {
-		logError.Printf("Could not get or create secret in namespace %s: %v", sa.Namespace, err)
+		logError.Printf("Could not get or create secret in namespace %s: %v", req.Namespace, err)
 		return toAdmissionResponse(err)
 	}
 
