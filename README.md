@@ -10,4 +10,11 @@ The following steps will install the webhook into an existing OpenShift deployme
 * make
 * oc new-project registry-puller
 * oc create configmap -n registry-puller registry-secret --from-file=secret.yaml
-* oc create -f registry-puller.yaml
+
+For OpenShift 3.11 execute
+
+* oc create -f registry-puller-3.11.yaml
+
+For OpenShift 4.0 execute
+
+* oc create -f registry-puller-4.0.yaml

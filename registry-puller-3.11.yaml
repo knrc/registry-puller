@@ -18,7 +18,7 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["mutatingwebhookconfigurations"]
-  verbs: ["get", "list", "watch", "patch", "create"]
+  verbs: ["*"]
 - apiGroups: ["extensions","apps"]
   resources: ["deployments"]
   resourceNames: ["registry-puller"]

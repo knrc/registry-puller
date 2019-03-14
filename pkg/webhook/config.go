@@ -75,7 +75,7 @@ func (wh *Webhook) createOrUpdateWebhookConfig() {
 	if err != nil {
 		logError.Printf("%v mutatingwebhookconfiguration update failed: %v", wh.webhookConfiguration.Name, err)
 	} else if updated {
-		logError.Printf("%v mutatingwebhookconfiguration updated", wh.webhookConfiguration.Name)
+		logInfo.Printf("%v mutatingwebhookconfiguration updated", wh.webhookConfiguration.Name)
 	}
 }
 
