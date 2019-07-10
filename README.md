@@ -20,6 +20,6 @@ For OpenShift 3.11 execute
 
 * oc create -f registry-puller-3.11.yaml
 
-For OpenShift 4.0 execute
+For OpenShift 4.0 and above execute
 
 * oc create -f registry-puller-4.0.yaml
