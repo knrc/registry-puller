@@ -2,7 +2,7 @@
 
 This repository contains code for a webhook which monitors the creation of ServiceAccounts within kubernetes namespaces and modifies those ServiceAccounts so they include an additional image pull secret.  This is of use when trying to deploy containers referencing private repos.
 
-# Building the registry-puller
+# Building the Registry Puller
 
 This is handled through the Makefile, execute make to build the operator and container
 
