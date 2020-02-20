@@ -24,8 +24,8 @@ import (
 	"github.com/howeyc/fsnotify"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	"k8s.io/api/admissionregistration/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -186,14 +186,14 @@ func NewWebhook(p PullerWebhookParameters) (*Webhook, error) {
 		namespace:          p.Namespace,
 	}
 
-	if registryPullerDeployment, err := wh.clientset.ExtensionsV1beta1().Deployments(wh.namespace).Get(wh.deploymentName, metav1.GetOptions{}); err != nil {
+	if registryPullerDeployment, err := wh.clientset.AppsV1().Deployments(wh.namespace).Get(wh.deploymentName, metav1.GetOptions{}); err != nil {
 		logError.Printf("Could not find %s/%s deployment to set ownerRef. The mutatingwebhookconfiguration must be deleted manually",
 			wh.namespace, wh.deploymentName)
 	} else {
 		wh.ownerRefs = []metav1.OwnerReference{
 			*metav1.NewControllerRef(
 				registryPullerDeployment,
-				extensionsv1beta1.SchemeGroupVersion.WithKind("Deployment"),
+				appsv1.SchemeGroupVersion.WithKind("Deployment"),
 			),
 		}
 	}

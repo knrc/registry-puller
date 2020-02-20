@@ -23,7 +23,7 @@ rules:
   resources: ["deployments"]
   resourceNames: ["registry-puller"]
   verbs: ["get"]
-- apiGroups: ["extensions"]
+- apiGroups: ["apps"]
   resources: ["deployments/finalizers"]
   resourceNames: ["registry-puller"]
   verbs: ["update"]
@@ -114,7 +114,7 @@ spec:
       serviceAccountName: registry-puller
       containers:
         - name: registry-puller
-          image: "knrc/registry-puller:1.0"
+          image: "knrc/registry-puller:1.1"
           imagePullPolicy: IfNotPresent
           ports:
           - name: webhook
