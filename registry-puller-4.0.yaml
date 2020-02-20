@@ -94,7 +94,7 @@ spec:
   selector:
     app: registry-puller
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: registry-puller
@@ -103,6 +103,9 @@ metadata:
     app: registry-puller
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: registry-puller
   template:
     metadata:
       labels:
