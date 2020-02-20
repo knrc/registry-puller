@@ -1,6 +1,6 @@
 NAME=registry-puller
 CONTAINER_NAME=knrc/$(NAME)
-CONTAINER_TAG=1.0
+CONTAINER_TAG=1.1
 
 .PHONY: all build docker clean
 
