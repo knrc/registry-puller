@@ -25,10 +25,18 @@ knrc/registry-puller   1.1                 b7aa1d34b2a1        23 hours ago     
 [your_login@localhost registry-puller]$
 ```
 
-If needed, tag and push this image to the image repository your OpenShift cluster has access to, and update the image reference in the corresponding registry-puller-*.yaml file, like so:
+If needed, tag and push this image to the image repository your OpenShift cluster has access to. For example, if your image registry is quay.io:
 
 ```
-[your_login@localhost registry-puller]$ git diff registry-puller-4.0.yaml
+QUAY_USERNAME=<your quay.io username>
+docker tag knrc/registry-puller:1.1 quay.io/${QUAY_USERNAME}/registry-puller:1.1
+docker push quay.io/${QUAY_USERNAME}/registry-puller:1.1
+```
+
+Now update the image reference in the corresponding registry-puller-*.yaml file, like so:
+
+```
+$ git diff registry-puller-4.0.yaml
 diff --git a/registry-puller-4.0.yaml b/registry-puller-4.0.yaml
 index af6e85e..2ac3960 100644
 --- a/registry-puller-4.0.yaml
@@ -38,11 +46,10 @@ index af6e85e..2ac3960 100644
        containers:
          - name: registry-puller
 -          image: "knrc/registry-puller:1.0"
-+          image: "quay.io/your_login/registry-puller:1.0"
++          image: "quay.io/<your quay.io username>/registry-puller:1.0"
            imagePullPolicy: IfNotPresent
            ports:
            - name: webhook
-[your_login@localhost registry-puller]$
 ```
 
 # Running the webhook
@@ -51,11 +58,12 @@ The following steps will install the webhook into an existing OpenShift deployme
 
 * create a secret with the login credentials for the image registry your need to access
 * download your secret and create a file called secret.yaml in your current working directory
-  - the name of the file has to be secret.yaml as a key with that name will be created in the registry-secret ConfigMap and the registry puller will look for it. In registry-puller-*.yaml, here is the corresponding command line parameter:
-	  ```
-      - --registry-secret-file
-      - /etc/registry-secret/secret.yaml
-	  ```
+  - If your image registry is quay.io, you can obtain this file by selecting "Account Settings" and then click the link "Generate Encrypted Password". Select to download a "Kubernetes Secret".
+* Rename the file so it is called `secret.yaml` because a key with that name will be created in the registry-secret ConfigMap and the registry puller will look for it. You can see this in the registry-puller-\*.yaml - see its corresponding command line parameter:
+```
+- --registry-secret-file
+- /etc/registry-secret/secret.yaml
+```
   - remove all metadata fields but name and namespace from the downloaded secret
 * oc new-project registry-puller
 * oc create configmap -n registry-puller registry-secret --from-file=secret.yaml
