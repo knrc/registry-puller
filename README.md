@@ -4,16 +4,24 @@ This repository contains code for a webhook which monitors the creation of Servi
 
 # Building the Registry Puller
 
-Building the registry puller is handled through the Makefile, execute make to build the operator and container
-
-* make
-
-make will build a container image knrc/registry-puller:1.0:
+Building the registry puller is handled through the Makefile. Clone this as a Go project and execute make to build the operator and container. These instructions assume you are putting the source in "$HOME/source" - change this to match your file structure.
 
 ```
-[your_login@localhost registry-puller]$ sudo docker images knrc/registry-puller:1.0
+SRC_DIR="$HOME/source"
+export GOPATH="${SRC_DIR}/registry-puller"
+mkdir -p ${GOPATH}/src/github.com/knrc
+cd ${GOPATH}/src/github.com/knrc
+git clone git@github.com:knrc/registry-puller.git
+cd registry-puller
+make
+```
+
+make will build a container image `knrc/registry-puller:1.1`:
+
+```
+[your_login@localhost registry-puller]$ sudo docker images knrc/registry-puller:1.1
 REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE
-knrc/registry-puller   1.0                 b7aa1d34b2a1        23 hours ago        241 MB
+knrc/registry-puller   1.1                 b7aa1d34b2a1        23 hours ago        241 MB
 [your_login@localhost registry-puller]$
 ```
 
